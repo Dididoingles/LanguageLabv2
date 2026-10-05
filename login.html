@@ -278,64 +278,66 @@
     </div>
   </div>
 
-  <script>
-    const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYuIulPmjwgggsoOZbw8wFC3JQuZ0JknOwbWc-gShRFY3IduFwgOAwL2soSRzHjcrv/exec';
+<script>
+  const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzYuIulPmjwgggsoOZbw8wFC3JQuZ0JknOwbWc-gShRFY3IduFwgOAwL2soSRzHjcrv/exec';
 
-    const statusEl = document.getElementById('status');
+  const statusEl = document.getElementById('status');
 
-    function setStatus(type, html) {
-      statusEl.className = 'status ' + type;
-      statusEl.innerHTML = html;
+  function setStatus(type, html) {
+    statusEl.className = 'status ' + type;
+    statusEl.innerHTML = html;
+  }
+
+  async function handleGoogleLogin(response) {
+    const idToken = response.credential;
+    if (!idToken) {
+      setStatus('error', 'Falha ao obter credenciais do Google.');
+      return;
     }
 
-    async function handleGoogleLogin(response) {
-      const idToken = response.credential;
-      if (!idToken) {
-        setStatus('error', 'Falha ao obter credenciais do Google.');
+    setStatus('loading', '<span class="spinner"></span> Validando acesso...');
+
+    try {
+      // CORREÇÃO CORS: URLSearchParams em vez de JSON.stringify
+      // Isso envia como application/x-www-form-urlencoded, que NÃO dispara preflight
+      const params = new URLSearchParams();
+      params.append('action', 'login');
+      params.append('credential', idToken);
+
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: 'POST',
+        body: params
+      });
+
+      const data = await res.json();
+
+      if (!data.authorized) {
+        const reason = data.reason || 'Acesso não autorizado.';
+        const email = data.email ? '<br><small>' + data.email + '</small>' : '';
+        setStatus('error', reason + email);
         return;
       }
 
-      setStatus('loading', '<span class="spinner"></span> Validando acesso...');
+      setStatus('success', 'Bem-vindo, <strong>' + data.user.name + '</strong>!');
 
-      try {
-        const res = await fetch(APPS_SCRIPT_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-          body: JSON.stringify({
-            action: 'login',
-            credential: idToken
-          })
-        });
+      sessionStorage.setItem('ll_auth', JSON.stringify({
+        token: data.sessionToken,
+        user: data.user,
+        expiresAt: Date.now() + (data.expiresIn * 1000)
+      }));
 
-        const data = await res.json();
+      setTimeout(() => {
+        setStatus('success', 'Redirecionando para o app...');
+      }, 800);
 
-        if (!data.authorized) {
-          const reason = data.reason || 'Acesso não autorizado.';
-          const email = data.email ? '<br><small>' + data.email + '</small>' : '';
-          setStatus('error', reason + email);
-          return;
-        }
-
-        setStatus('success', 'Bem-vindo, <strong>' + data.user.name + '</strong>!');
-
-        sessionStorage.setItem('ll_auth', JSON.stringify({
-          token: data.sessionToken,
-          user: data.user,
-          expiresAt: Date.now() + (data.expiresIn * 1000)
-        }));
-
-        setTimeout(() => {
-          setStatus('success', 'Redirecionando para o app...');
-        }, 800);
-
-      } catch (err) {
-        console.error(err);
-        setStatus('error', 'Erro de conexão. Tente novamente.');
-      }
+    } catch (err) {
+      console.error(err);
+      setStatus('error', 'Erro de conexão. Tente novamente.');
     }
+  }
 
-    window.handleGoogleLogin = handleGoogleLogin;
-  </script>
+  window.handleGoogleLogin = handleGoogleLogin;
+</script>
 
 </body>
 </html>
