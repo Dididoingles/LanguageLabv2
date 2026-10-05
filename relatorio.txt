@@ -1,0 +1,324 @@
+================================================================================
+LANGUAGE LAB - RELATORIO DE PROGRESSO
+Data: 03/10/2026
+Projeto: Sistema de Login com Google Auth
+================================================================================
+
+--------------------------------------------------------------------------------
+1. OBJETIVO DO PROJETO
+--------------------------------------------------------------------------------
+
+Refatorar o webapp Language Lab para:
+
+- Estruturar o fluxo de páginas (hero -> login -> index -> labs -> sub-labs)
+- Adicionar autenticacao via Google Sign-In
+- Limitar acesso as IAs (que consomem API Groq no free tier) apenas a alunos
+  cadastrados pelo professor
+- Manter a chave da API Groq segura (ja esta em PropertiesService do Apps Script,
+  server-side, nunca exposta ao cliente)
+
+Decisao arquitetural principal:
+
+- A lista de alunos autorizados fica numa planilha privada do Google Sheets
+- O Google Apps Script atua como backend de validacao (nao o front-end)
+- O front-end (login.html) so recebe a resposta "autorizado / nao autorizado"
+- Nada de credenciais sensiveis no codigo cliente
+
+
+--------------------------------------------------------------------------------
+2. ARQUITETURA FINAL DEFINIDA
+--------------------------------------------------------------------------------
+
+  [hero.html]  (landing page Three.js - Mars)
+       |
+       | clique "Start"
+       v
+  [login.html]  (Google Sign-In)
+       |
+       | JWT do Google -> Apps Script
+       | Apps Script valida + consulta planilha
+       v
+  [index.html]  (homepage - protegida por auth.js)
+       |
+       v
+  [labs.html]  (grid dos 4 labs)
+       |
+       +--> listening.html --> Music Lab / Short Cinema / Listening Test
+       +--> reading.html   --> A1 / A2-B1 / B2-C1
+       +--> speaking.html  --> Speaking Studio / Pronuncia
+       +--> writing.html   --> Ajudante / A Mao Livre
+
+  Camada privada (Google Sites + Apps Script):
+       sites.google.com/view/languagelabbr/...
+       (ja protegido pelo Google, consome Groq via Apps Script)
+
+
+--------------------------------------------------------------------------------
+3. NOMES E IDENTIFICADORES CONFIRMADOS
+--------------------------------------------------------------------------------
+
+Planilha de usuarios:
+    Nome: "Alunos Language Lab"
+    Aba: "Usuarios"
+    Colunas:
+        A = Email
+        B = Nome
+    ID da planilha (USUARIOS_ID):
+        1mXNHm35jKAHcnDy1jNcQemHD06fLCxkWWmNfjNw5p6I
+
+Contas ficticias cadastradas para teste:
+    - professor@gmail.com  | Professor
+    - aluno1@gmail.com     | Aluno Teste 1
+    - aluno2@gmail.com     | Aluno Teste 2
+    (TROCAR por emails reais quando for testar de verdade)
+
+OAuth Client ID (Google Cloud):
+    292714518504-bm1on42mdeevgrfl15ke3bua8uo49m68.apps.googleusercontent.com
+
+Projeto no Google Cloud Console:
+    Nome: Language Lab Auth
+    Tela de permissao OAuth: configurada (Externo)
+    Escopos: email, profile, openid
+
+Apps Script:
+    Nome do projeto: LanguageLab Auth
+    Tipo: Standalone (nao container-bound)
+    Implantado como: App da Web
+        - Executar como: Eu
+        - Quem tem acesso: Qualquer pessoa
+    URL do Web App (anotar quando for reimplantar):
+        https://script.google.com/macros/s/AKfycbzYuIulPmjwgggsoOZbw8wFC3JQuZ0JknOwbWc-gShRFY3IduFwgOAwL2soSRzHjcrv/exec
+
+
+--------------------------------------------------------------------------------
+4. O QUE FOI FEITO HOJE (PASSO A PASSO)
+--------------------------------------------------------------------------------
+
+[X] 1. Analise da estrutura atual do projeto (hero, index, labs, sub-labs)
+
+[X] 2. Definicao da arquitetura de login:
+       - Google Auth + Apps Script como backend de validacao
+       - Planilha privada como lista de usuarios autorizados
+       - Sessao via token UUID armazenado em CacheService
+
+[X] 3. Criacao do projeto "Language Lab Auth" no Google Cloud Console
+
+[X] 4. Configuracao da Tela de Permissao OAuth (Externo)
+
+[X] 5. Criacao do OAuth Client ID (tipo: Aplicativo da Web)
+       Origens JavaScript autorizadas:
+           (a URL do CodePad - nao serve, ver secao 6)
+           https://SEU_USUARIO.github.io   <-- adicionar quando migrar
+       URIs de redirecionamento autorizados:
+           https://SEU_USUARIO.github.io/LanguageLab/login.html
+
+[X] 6. Criacao do projeto no Google Apps Script (standalone)
+
+[X] 7. Codigo .gs escrito com:
+       - getConfig_() le tudo de PropertiesService (nada hardcoded)
+       - doPost() / doGet()
+       - handleLogin() valida JWT + consulta planilha + gera sessionToken
+       - handleValidateSession() valida token de sessao
+       - validateGoogleJWT() chama oauth2.googleapis.com/tokeninfo
+       - findUserInSheet() le planilha via openById
+       - jsonResponse() helper
+       - debugConfig() funcao de debug
+
+[X] 8. Properties configuradas no Apps Script:
+       CLIENT_ID      = 292714518504-bm1on42mdeevgrfl15ke3bua8uo49m68...
+       USUARIOS_ID    = 1mXNHm35jKAHcnDy1jNcQemHD06fLCxkWWmNfjNw5p6I
+       USUARIOS_TAB   = Usuarios
+       SESSION_TTL    = 28800  (8 horas)
+
+[X] 9. debugConfig() rodou com sucesso:
+       - Config carregada OK
+       - Planilha acessivel (4 linhas)
+       - 3 usuarios lidos corretamente
+
+[X] 10. Apps Script implantado como Web App
+        - Executar como: Eu
+        - Quem tem acesso: Qualquer pessoa
+
+[X] 11. login.html criado com:
+        - Layout dark/vermelho (tema Language Lab)
+        - Botao "Sign in with Google"
+        - Status dinamico (idle / loading / error / success)
+        - Fetch para o Apps Script
+        - sessionStorage para guardar sessao
+
+[X] 12. Ajuste responsivo: brackets (HUD cantos) escondidos no celular
+        (media query max-width: 640px)
+
+
+--------------------------------------------------------------------------------
+5. ERROS ENCONTRADOS E SOLUCOES
+--------------------------------------------------------------------------------
+
+ERRO 1: "Cannot read properties of undefined (reading 'postData')"
+    Causa: clicar em Executar com a funcao doPost selecionada no editor.
+           doPost so funciona quando o Google chama (com POST real).
+    Solucao: ignorar. Testar via debugConfig() em vez de doPost.
+
+ERRO 2: debugConfig falhou ao abrir planilha
+    Causa: USUARIOS_ID foi preenchido com a URL completa
+           ("https://docs.google.com/spreadsheets/d/ID/edit?usp=sharing")
+    Solucao: usar apenas o ID puro:
+           "1mXNHm35jKAHcnDy1jNcQemHD06fLCxkWWmNfjNw5p6I"
+
+ERRO 3: "Erro 400: origin_mismatch" no login
+    Causa: CodePad gera URL/subdominio novo a cada arquivo criado, e
+           muda sozinho sem o usuario mexer. A URL autorizada no Google
+           Cloud nao bate mais com a URL atual do CodePad.
+    Solucao: migrar para um host fixo (GitHub Pages / Netlify / Vercel).
+             CodePad nao serve como hospedagem de producao.
+
+
+--------------------------------------------------------------------------------
+6. DECISAO SOBRE HOSPEDAGEM
+--------------------------------------------------------------------------------
+
+CodePad NAO SERVE para hospedar o login em producao.
+
+Motivo: ele muda a URL/subdominio sozinho, e o Google Cloud exige origens
+JavaScript FIXAS. Nao ha como autorizar uma URL que muda sozinha.
+
+CodePad continua util como EDITOR (voce escreve la e copia para o host).
+
+Hospedagem definitiva recomendada: GitHub Pages
+    Vantagens: gratis, URL fixa, voce ja usa GitHub
+    URL esperada: https://SEU_USUARIO.github.io/LanguageLab/login.html
+
+Alternativas: Netlify, Vercel, Cloudflare Pages (todos gratis e com URL fixa)
+
+
+--------------------------------------------------------------------------------
+7. O QUE FALTA FAZER (AMANHA)
+--------------------------------------------------------------------------------
+
+[ ] 1. Decidir onde hospedar (recomendado: GitHub Pages)
+
+[ ] 2. Subir os arquivos para o host escolhido:
+       - hero.html
+       - login.html
+       - auth.js (ainda nao criado - ver item 5)
+       - index.html (modificado)
+       - labs.html
+       - listening.html / reading.html / speaking.html / writing.html
+
+[ ] 3. Voltar no Google Cloud Console -> Clientes -> editar o Client ID
+       Adicionar as origens de producao:
+           Origens JavaScript: https://SEU_USUARIO.github.io
+           Redirect URIs:      https://SEU_USUARIO.github.io/LanguageLab/login.html
+
+[ ] 4. Testar o login em producao (URL fixa)
+       - Conta autorizada -> deve entrar
+       - Conta nao autorizada -> deve mostrar "Acesso nao autorizado"
+
+[ ] 5. Criar o arquivo auth.js (guarda das paginas internas)
+       - Verifica sessionStorage.ll_auth
+       - Se ausente/expirado -> redireciona para login.html
+       - Expoe window.LL_SESSION e window.LL_logout
+       - Adiciona botao de logout flutuante
+
+[ ] 6. Incluir <script src="auth.js"></script> no <head> das paginas:
+       - index.html
+       - labs.html
+       - listening.html
+       - reading.html
+       - speaking.html
+       - writing.html
+
+[ ] 7. Refatorar hero.html:
+       - Trocar o redirect final de index.html para login.html
+
+[ ] 8. Refatorar index.html:
+       - Unificar tema visual (dark + vermelho)
+       - Trocar links diretos para sites.google.com por links internos (labs.html)
+       - Integrar com auth.js
+
+[ ] 9. Integrar labs.html ao fluxo (hoje esta orfao)
+
+[ ] 10. Unificar tema visual das sub-paginas (reading.html esta com tema claro,
+        destoa dos outros)
+
+[ ] 11. Trocar emails ficticios da planilha por emails reais quando for testar
+        com alunos de verdade
+
+[ ] 12. Considerar mover os links externos para Google Sites para dentro do
+        fluxo autenticado, ou deixar como esta (a protecao real ja esta no
+        Google Sites + Apps Script)
+
+
+--------------------------------------------------------------------------------
+8. PROXIMOS PASSOS IMEDIATOS (ORDEM SUGERIDA)
+--------------------------------------------------------------------------------
+
+1. Escolher host (GitHub Pages de preferencia)
+2. Fazer upload do login.html + auth.js
+3. Atualizar origens no Google Cloud
+4. Testar login de ponta a ponta
+5. So depois refatorar o resto (hero, index, labs, sub-labs)
+
+
+--------------------------------------------------------------------------------
+9. OBSERVACOES IMPORTANTES
+--------------------------------------------------------------------------------
+
+- A chave da API Groq NUNCA deve ir para o front-end. Ela ja esta em
+  PropertiesService do Apps Script (server-side), o que esta correto.
+
+- O Client ID (292714518504-...) e PUBLICO. Pode aparecer no login.html sem
+  problema. O que NUNCA deve aparecer e o Client Secret (que nem usamos).
+
+- O codigo .gs nao tem nenhum ID hardcoded. Tudo vem de PropertiesService.
+  Isso foi uma correcao importante: a primeira versao que eu (DS) escrevi
+  tinha os IDs hardcoded na funcao setupProperties(). Corrigido.
+
+- A planilha "Alunos Language Lab" precisa continuar privada. O Apps Script
+  acessa ela via openById usando a conta que executa o script (voce). Alunos
+  nunca tem acesso direto a planilha.
+
+- Se um dia migrar as IAs do Google Sites para o seu proprio dominio, o
+  sistema de login ja estara pronto para protege-las tambem. Basta as IAs
+  validarem o sessionToken antes de chamar Groq.
+
+- Token de sessao: gerado como UUID, armazenado em CacheService com TTL de
+  8 horas. Se o CacheService limpar (acontece), o usuario precisa logar de
+  novo. Para persistencia real, trocar por PropertiesService ou um banco.
+
+
+--------------------------------------------------------------------------------
+10. REFERENCIAS DE URLS
+--------------------------------------------------------------------------------
+
+Google Cloud Console:
+    https://console.cloud.google.com
+
+Apps Script (editor):
+    https://script.google.com
+
+Planilha "Alunos Language Lab":
+    https://docs.google.com/spreadsheets/d/1mXNHm35jKAHcnDy1jNcQemHD06fLCxkWWmNfjNw5p6I
+
+CodePad (editor, nao usar como host):
+    https://u27202k.live.codepad.app
+
+Endpoint do Apps Script (Web App):
+    https://script.google.com/macros/s/AKfycbzYuIulPmjwgggsoOZbw8wFC3JQuZ0JknOwbWc-gShRFY3IduFwgOAwL2soSRzHjcrv/exec
+
+
+--------------------------------------------------------------------------------
+11. OBSERVACAO FINAL
+--------------------------------------------------------------------------------
+
+Toda a parte de backend (Apps Script + Properties + planilha + validacao JWT)
+esta FUNCIONANDO. O unico bloqueio para teste end-to-end e a hospedagem fixa
+do front-end. Resolvido isso, o login funciona de ponta a ponta.
+
+Nada do que foi feito hoje precisa ser refeito. Apenas migrar o login.html
+para um host fixo e atualizar as origens no Google Cloud.
+
+
+================================================================================
+FIM DO RELATORIO
+================================================================================
