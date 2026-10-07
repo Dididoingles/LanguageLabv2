@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <link rel="icon" type="image/png" href="imgs/favicon.png">
     <title>Language Lab</title>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -34,15 +35,13 @@
             --shadow-app: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             --shadow-drawer: 0 10px 25px -5px rgba(0, 0, 0, 0.151), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
             --shadow-card: 0 8px 20px rgba(0, 0, 0, 0.157);
-            --shadow-card-hover: 0 12px 24px rgba(200, 0, 10, 0.35);
             --shadow-panel: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.04);
 
             --navbar-height: 64px;
-
             --sidebar-closed-width: 96px;
             --sidebar-open-width: 260px;
 
-            /* GRID RECUADO: começa a 210px, sidebar aberta cobre parcialmente */
+            /* GRID DE ÍCONES (posicionamento desktop — igual index5.html) */
             --icon-grid-left: 210px;
             --icon-grid-width: 240px;
             --icon-grid-gap-x: 45px;
@@ -55,6 +54,13 @@
             --gooey-primary: #c8000a;
             --gooey-primary-light: #e01a2a;
             --gooey-pill-size: 46px;
+
+            /* Skeleton */
+            --skeleton-base: #eef1f5;
+            --skeleton-shine: #f7f9fc;
+
+            /* Decoração build.png (grande, canto inferior direito) */
+            --decor-build-width: calc(620px * 0.8);  /* = 496px */
         }
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -89,6 +95,7 @@
             background-position: 0 0;
         }
 
+        /* ---------- NAVBAR ---------- */
         .navbar {
             height: var(--navbar-height);
             background-color: var(--color-primary);
@@ -103,15 +110,37 @@
             box-sizing: border-box;
         }
 
-        .navbar-brand { display: flex; align-items: center; gap: 12px; color: #fff; }
-
-        .navbar-logo-badge {
-            width: 32px; height: 32px; border-radius: 50%;
-            background-color: var(--color-white-translucent-20);
-            display: flex; align-items: center; justify-content: center;
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 0;
+            min-width: 0;
+            flex: 1;
         }
 
-        .navbar-brain-icon { color: #fff; font-size: 1.125rem; }
+        .navbar-brand {
+            display: flex; align-items: center; gap: 12px;
+            color: #fff; text-decoration: none; cursor: pointer;
+        }
+
+        /* Container do logo — sem pill, sem background, sem borda */
+        .navbar-logo-badge {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* Imagem do logo (faviconbranco.png) */
+        .navbar-logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+            display: block;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+        }
 
         .navbar-title { font-weight: 700; font-size: 1.25rem; letter-spacing: -0.5px; }
 
@@ -127,36 +156,61 @@
             letter-spacing: -0.5px; user-select: none;
         }
 
-        .navbar-actions { display: flex; align-items: center; gap: 16px; color: #fff; }
+        .navbar-actions { display: flex; align-items: center; gap: 16px; color: #fff; flex-shrink: 0; }
 
         .navbar-btn {
             background: transparent; border: none; cursor: pointer;
             padding: 8px; border-radius: 50%;
-            transition: background-color 0.2s;
+            transition: background-color 0.2s, opacity 0.2s;
             color: #fff; font-size: 1.125rem;
             display: flex; align-items: center; justify-content: center;
+            position: relative;
         }
 
         .navbar-btn:hover { background-color: var(--color-white-translucent-10); }
 
-        /* ---------- BOTAO MENU MOBILE ---------- */
-        .mobile-menu-wrapper { display: none; }
-
-        .mobile-menu-btn {
-            display: flex; align-items: center; gap: 8px;
-            height: 40px; padding: 0 14px;
-            background-color: transparent;
-            color: var(--color-primary);
-            border: 1.5px solid var(--color-primary);
-            border-radius: 12px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 0.875rem; font-weight: 600;
-            letter-spacing: -0.5px; cursor: pointer;
-            transition: background-color 0.2s, color 0.2s;
+        #sound-icon {
+            display: inline-block;
+            transition: color 0.2s ease;
+            transform-origin: center;
         }
 
-        .mobile-menu-btn i { font-size: 1rem; }
-        .mobile-menu-btn:hover { background-color: rgba(200, 0, 10, 0.08); }
+        .navbar-btn.muted #sound-icon {
+            color: rgba(255, 255, 255, 0.55);
+        }
+
+        @keyframes soundTogglePop {
+            0%   { transform: scale(1) rotate(0deg); }
+            40%  { transform: scale(0.7) rotate(-15deg); }
+            70%  { transform: scale(1.15) rotate(8deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+
+        .navbar-btn.toggling #sound-icon {
+            animation: soundTogglePop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        /* ---------- BOTAO MENU MOBILE (oculto no desktop) ---------- */
+        .mobile-menu-btn {
+            display: none;
+            align-items: center; justify-content: center;
+            width: 36px; height: 36px; padding: 0;
+            background-color: transparent;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+            flex-shrink: 0;
+        }
+
+        .mobile-menu-btn:hover { background-color: var(--color-white-translucent-10); }
+
+        .mobile-menu-btn .lucide {
+            width: 1.35rem;
+            height: 1.35rem;
+            stroke-width: 2.2;
+        }
 
         /* ---------- OVERLAY DESKTOP DA SIDEBAR ---------- */
         .sidebar-overlay {
@@ -178,7 +232,7 @@
             cursor: pointer;
         }
 
-        /* ---------- SIDEBAR ---------- */
+        /* ---------- SIDEBAR (DESKTOP) ---------- */
         .sidebar-drawer {
             position: absolute;
             top: calc(50% + (var(--navbar-height) / 2));
@@ -196,7 +250,6 @@
             padding: 24px 0;
             display: flex;
             flex-direction: column;
-            justify-content: space-between;
             user-select: none;
             box-sizing: border-box;
             width: var(--sidebar-closed-width);
@@ -212,6 +265,7 @@
         .nav-group {
             display: flex; flex-direction: column; gap: 12px;
             position: relative; padding: 0 20px;
+            width: 100%;
         }
 
         .nav-item {
@@ -277,18 +331,302 @@
             animation: gooeyStretch 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) forwards;
         }
 
-        /* ---------- GRID DE ICONES ---------- */
-        .icons-grid-container {
+        /* ============================================================
+           ÁREA DE CONTEÚDO
+           ============================================================ */
+        .view-container {
             position: absolute;
-            top: calc(var(--navbar-height) + 40px);
-            left: var(--icon-grid-left);
+            top: var(--navbar-height);
+            left: 0; right: 0; bottom: 0;
+            z-index: 10;
+            overflow: hidden;
+        }
+
+        .view-container > * {
+            animation: fadeIn 0.25s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ---------- PÁGINAS INTERNAS ---------- */
+        .page-content {
+            padding: 40px 40px 40px 240px;
+            height: 100%;
+            overflow-y: auto;
+            box-sizing: border-box;
+        }
+
+        .page-title {
+            font-size: 1.75rem;
+            color: var(--color-primary);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .page-sub {
+            color: var(--color-text-subtle);
+            font-size: 0.95rem;
+            margin-bottom: 28px;
+        }
+
+        /* ---------- BOTÃO VOLTAR (DISCRETO EM CINZA) ---------- */
+        .back-link {
+            display: inline-flex; align-items: center; gap: 6px;
+            margin-bottom: 24px;
+            color: var(--color-text-subtle);
+            font-size: 0.85rem;
+            font-weight: 500;
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .back-link:hover {
+            color: var(--color-text-muted);
+            text-decoration: underline;
+        }
+
+        .back-link .lucide {
+            width: 1rem;
+            height: 1rem;
+            stroke-width: 2;
+        }
+
+        /* ---------- CARDS GRID (usado em páginas tipo menu) ---------- */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            max-width: 760px;
+        }
+
+        .card-item {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 14px;
+            padding: 20px;
+            box-shadow: var(--shadow-card);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+        }
+
+        .card-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 24px rgba(200, 0, 10, 0.18);
+        }
+
+        .card-item-icon {
+            width: 40px; height: 40px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(200, 0, 10, 0.08);
+            border-radius: 10px;
+            color: var(--color-primary);
+        }
+
+        .card-item-icon .lucide { width: 20px; height: 20px; }
+
+        .card-item-body { flex: 1; }
+
+        .card-item h3 {
+            font-size: 1rem;
+            margin-bottom: 4px;
+            color: var(--color-text-main);
+        }
+
+        .card-item p {
+            font-size: 0.8rem;
+            color: var(--color-text-subtle);
+        }
+
+        /* ---------- TOOLS LIST (lista de ferramentas dentro de um lab) ---------- */
+        .tools-list {
+            list-style: none;
+            max-width: 520px;
+        }
+
+        .tools-list li {
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-card);
+            cursor: pointer;
+            transition: transform 0.15s ease, border-color 0.15s ease;
+            font-size: 0.95rem;
+            color: var(--color-text-main);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .tools-list li:hover {
+            transform: translateX(4px);
+            border-color: var(--color-primary);
+        }
+
+        .tool-icon {
+            width: 32px; height: 32px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(200, 0, 10, 0.08);
+            border-radius: 8px;
+            color: var(--color-primary);
+        }
+
+        .tool-icon .lucide { width: 16px; height: 16px; }
+
+        /* ============================================================
+           PÁGINA DE FERRAMENTA EXTERNA
+           ============================================================ */
+        .tool-page {
+            max-width: 640px;
+        }
+
+        .tool-card {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #fff;
+            border: 1px solid var(--color-border);
+            border-radius: 18px;
+            padding: 24px;
+            box-shadow: var(--shadow-card);
+            text-decoration: none;
+            color: inherit;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+            position: relative;
+        }
+
+        .tool-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--color-primary);
+            box-shadow: 0 16px 32px rgba(200, 0, 10, 0.18);
+        }
+
+        .tool-card-icon {
+            width: 72px; height: 72px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+            background: rgba(200, 0, 10, 0.08);
+            border-radius: 18px;
+            color: var(--color-primary);
+            transition: background-color 0.2s ease, color 0.2s ease;
+        }
+
+        .tool-card:hover .tool-card-icon {
+            background: var(--color-primary);
+            color: #fff;
+        }
+
+        .tool-card-icon .lucide { width: 34px; height: 34px; stroke-width: 2; }
+
+        .tool-card-body { flex: 1; min-width: 0; }
+
+        .tool-card-title {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: var(--color-text-main);
+            margin-bottom: 6px;
+            letter-spacing: -0.5px;
+        }
+
+        .tool-card-desc {
+            font-size: 0.85rem;
+            color: var(--color-text-subtle);
+            line-height: 1.45;
+            margin: 0;
+        }
+
+        .tool-card-external {
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            color: var(--color-text-subtle);
+            transition: color 0.2s ease, transform 0.2s ease;
+        }
+
+        .tool-card-external .lucide {
+            width: 18px;
+            height: 18px;
+            stroke-width: 2;
+        }
+
+        .tool-card:hover .tool-card-external {
+            color: var(--color-primary);
+            transform: translate(2px, -2px);
+        }
+
+        /* ============================================================
+           PÁGINA INICIAL — GRID DE ÍCONES + PAINEL AVISOS
+           ============================================================ */
+        .home-page {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            padding: 0;
+            box-sizing: border-box;
+            overflow: hidden;
+        }
+
+        .home-inner {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding-left: var(--icon-grid-left);
+            box-sizing: border-box;
+            gap: 28px;
+        }
+
+        .home-heading {
+            width: var(--icon-grid-width);
+            text-align: center;
+            z-index: 11;
+            pointer-events: none;
+            flex-shrink: 0;
+        }
+
+        .home-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            letter-spacing: -0.5px;
+            margin: 0 0 4px 0;
+            white-space: nowrap;
+            line-height: 1.15;
+        }
+
+        .home-sub {
+            font-size: 0.875rem;
+            font-weight: 400;
+            color: var(--color-text-subtle);
+            margin: 0;
+            white-space: nowrap;
+            line-height: 1.2;
+            letter-spacing: -0.5px;
+        }
+
+        /* ---------- GRID DE ÍCONES ---------- */
+        .icons-grid-container {
             width: var(--icon-grid-width);
             z-index: 10;
-            display: flex; flex-direction: column;
-            align-items: center; text-align: center;
-            height: calc(100% - var(--navbar-height) - 80px);
-            justify-content: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
             pointer-events: none;
+            flex-shrink: 0;
         }
 
         .icons-grid-container > * { pointer-events: auto; }
@@ -303,7 +641,10 @@
         }
 
         .grid-icon-wrapper {
-            display: flex; flex-direction: column; align-items: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            cursor: pointer;
         }
 
         .grid-icon-card {
@@ -337,10 +678,9 @@
 
         .grid-icon-card:hover .grid-card-icon { color: #fff; }
 
-        /* ---------- LABEL COM SHADOWS INTO LIGHT ---------- */
         .grid-card-label {
             font-family: 'Shadows Into Light', cursive;
-            font-size: 1.25rem;
+            font-size: 1rem;
             color: var(--color-icon);
             margin-top: 4px;
             font-weight: 400;
@@ -356,8 +696,11 @@
 
         /* ---------- PAINEL AVISOS ---------- */
         .avisos-panel {
-            position: absolute; top: 80px; right: 38px;
-            width: 330px; height: 260px;
+            position: absolute;
+            top: 24px;
+            right: 38px;
+            width: 330px;
+            height: 180px;
             background-color: var(--color-bg-app);
             border-radius: 1rem;
             box-shadow: var(--shadow-panel);
@@ -373,6 +716,7 @@
             height: 40px; padding: 0 16px;
             display: flex; align-items: center; justify-content: space-between;
             color: #fff; user-select: none; box-sizing: border-box;
+            flex-shrink: 0;
         }
 
         .avisos-header-title-box { display: flex; align-items: center; gap: 8px; }
@@ -397,11 +741,27 @@
             padding: 16px; flex: 1;
             position: relative; background-color: #fff;
             box-sizing: border-box;
+            overflow: hidden;
         }
 
         .avisos-text {
             font-size: 0.75rem; color: var(--color-text-subtle);
             font-style: italic; margin: 0;
+            position: relative;
+            z-index: 2;
+            max-width: 60%;
+        }
+
+        .avisos-mars {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 92px;
+            height: auto;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            z-index: 1;
         }
 
         /* ---------- OVERLAY MOBILE ---------- */
@@ -416,41 +776,230 @@
 
         .mobile-overlay.active { display: block; opacity: 1; }
 
-        /* ---------- RESPONSIVIDADE ---------- */
-        @media screen and (max-width: 1024px) {
-            .avisos-panel { width: 280px; right: 20px; }
+        /* ============================================================
+           SKELETON LOADER
+           ============================================================ */
+        .skeleton-page {
+            padding: 40px 40px 40px 240px;
+            height: 100%;
+            box-sizing: border-box;
         }
 
+        .skeleton-line,
+        .skeleton-block {
+            background-color: var(--skeleton-base);
+            border-radius: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .skeleton-line::after,
+        .skeleton-block::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(
+                90deg,
+                transparent 0%,
+                var(--skeleton-shine) 50%,
+                transparent 100%
+            );
+            transform: translateX(-100%);
+            animation: skeletonShimmer 1.4s infinite;
+        }
+
+        @keyframes skeletonShimmer {
+            100% { transform: translateX(100%); }
+        }
+
+        .skeleton-back    { width: 140px; height: 14px; margin-bottom: 24px; }
+        .skeleton-title   { width: 260px; height: 28px; margin-bottom: 10px; }
+        .skeleton-sub     { width: 340px; height: 14px; margin-bottom: 32px; }
+        .skeleton-card    { height: 92px; border-radius: 14px; }
+        .skeleton-tool    { height: 60px; border-radius: 12px; margin-bottom: 10px; }
+        .skeleton-tool-card { height: 120px; border-radius: 18px; }
+        .skeleton-icon    { height: var(--card-size); border-radius: 18px; }
+
+        .skeleton-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 16px;
+            max-width: 760px;
+        }
+
+        .skeleton-tools {
+            max-width: 520px;
+        }
+
+        .skeleton-tool-page {
+            max-width: 640px;
+        }
+
+        /* Skeleton da home */
+        .skeleton-page.skeleton-page-home {
+            padding: 0;
+            position: relative;
+        }
+
+        .skeleton-home {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            justify-content: center;
+            padding-left: var(--icon-grid-left);
+            box-sizing: border-box;
+            gap: 28px;
+        }
+
+        .skeleton-home-grid {
+            width: var(--icon-grid-width);
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            column-gap: var(--icon-grid-gap-x);
+            row-gap: var(--icon-grid-gap-y);
+            justify-items: center;
+        }
+
+        .skeleton-home-panel {
+            position: absolute;
+            top: 24px;
+            right: 38px;
+            width: 330px;
+            height: 180px;
+            border-radius: 1rem;
+        }
+
+        /* ============================================================
+           STAGGER / MOUNT ANIMATION
+           ============================================================ */
+        .stagger-item {
+            opacity: 0;
+            transform: translateY(14px);
+            animation: staggerIn 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+        }
+
+        @keyframes staggerIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            .stagger-item,
+            .view-container > *,
+            .skeleton-line::after,
+            .skeleton-block::after,
+            .decor {
+                animation: none !important;
+                opacity: 1 !important;
+                transform: none !important;
+            }
+        }
+
+        /* ============================================================
+           DECORAÇÃO build.png
+           ============================================================ */
+        .decorations {
+            position: absolute;
+            inset: 0;
+            pointer-events: none;
+            z-index: 4;
+            overflow: hidden;
+        }
+
+        .decor {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+            -webkit-user-drag: none;
+            opacity: 0;
+            animation: decorFadeIn 1.2s ease forwards;
+        }
+
+        @keyframes decorFadeIn {
+            from { opacity: 0; transform: translateY(8px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .decor-build {
+            right: 0;
+            bottom: 0;
+            width: var(--decor-build-width);
+            height: auto;
+            animation-delay: 0.4s;
+        }
+
+        @media screen and (max-width: 1024px) {
+            :root {
+                --decor-build-width: 460px;
+            }
+        }
+
+        /* ============================================================
+           RESPONSIVIDADE — MOBILE
+           ============================================================ */
         @media screen and (max-width: 768px) {
             body {
-                display: block; height: auto; min-height: 100vh;
-                width: 100%; overflow-y: auto; overflow-x: hidden;
-                align-items: initial; justify-content: initial;
+                display: block;
+                height: auto;
+                min-height: 100vh;
+                width: 100%;
+                overflow-y: auto;
+                overflow-x: hidden;
+                align-items: initial;
+                justify-content: initial;
             }
 
             .app-container {
-                height: auto; min-height: 100vh; max-height: none;
-                overflow: visible; box-shadow: none;
+                height: auto;
+                min-height: 100vh;
+                max-height: none;
+                overflow: visible;
+                box-shadow: none;
                 padding-bottom: 40px;
             }
 
-            .navbar { padding: 0 16px; z-index: 70; }
-            .navbar-brand { gap: 8px; }
-            .navbar-logo-badge { width: 28px; height: 28px; }
-            .navbar-brain-icon { font-size: 1rem; }
-            .navbar-title { font-size: 1rem; }
-            .navbar-greeting-separator { font-size: 0.8rem; margin: 0 1px; }
-            .navbar-greeting { font-size: 0.8rem; }
+            .navbar { padding: 0 12px; z-index: 40; gap: 4px; }
 
-            .mobile-menu-wrapper { display: flex; padding: 16px 24px 0 24px; }
-            .mobile-menu-btn { display: flex; }
+            .navbar-left { gap: 6px; }
+
+            .mobile-menu-btn {
+                display: flex;
+                width: 32px; height: 32px;
+                margin-right: 2px;
+            }
+
+            .mobile-menu-btn .lucide {
+                width: 1.25rem;
+                height: 1.25rem;
+            }
+
+            .navbar-brand { gap: 6px; min-width: 0; }
+
+            .navbar-logo-img { width: 26px; height: 26px; }
+            .navbar-title { font-size: 0.95rem; }
+
+            .navbar-greeting-separator,
+            .navbar-greeting { display: none; }
+
+            .navbar-actions { gap: 4px; }
+            .navbar-btn { padding: 6px; font-size: 1rem; }
 
             .sidebar-overlay { display: none; }
 
+            .decorations { display: none; }
+
             .sidebar-drawer {
-                position: fixed; top: 0; left: 0;
+                position: fixed;
+                top: 0;
+                left: 0;
                 transform: translateX(-100%);
-                height: 100vh; max-height: none; width: 260px;
+                height: 100vh;
+                max-height: none;
+                width: 220px;
                 border-radius: 0 20px 20px 0;
                 box-shadow: 10px 0 30px rgba(0, 0, 0, 0.2);
                 padding: 32px 0;
@@ -458,43 +1007,143 @@
                 z-index: 60;
             }
 
-            .sidebar-drawer:hover { width: 260px; }
+            .sidebar-drawer:hover { width: 220px; }
             .sidebar-drawer.mobile-open { transform: translateX(0); }
             .sidebar-drawer .nav-text { opacity: 1; }
 
-            .icons-grid-container {
-                position: relative; top: auto; left: auto;
-                width: 100%; padding: 16px 20px 20px 20px;
-                margin-top: 0;
-                display: flex; flex-direction: column; align-items: center;
-                box-sizing: border-box; height: auto;
+            .view-container {
+                position: relative;
+                top: auto; left: auto; right: auto; bottom: auto;
+                overflow: visible;
+            }
+
+            .page-content { padding: 20px 24px 40px 24px; }
+            .skeleton-page { padding: 20px 24px 40px 24px; }
+
+            .cards-grid { grid-template-columns: 1fr; }
+            .skeleton-cards { grid-template-columns: 1fr; }
+            .skeleton-sub { width: 80%; }
+            .skeleton-title { width: 70%; }
+
+            /* ---------- Home mobile ---------- */
+            .home-page {
+                padding: 32px 20px 40px 20px;
+                height: auto;
+                overflow: visible;
+            }
+
+            .home-inner {
+                position: relative;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
                 justify-content: flex-start;
+                padding-left: 0;
+                gap: 24px;
+            }
+
+            .home-heading {
+                width: 100%;
+                margin: 0 0 4px 0;
+                padding: 0 4px;
+                text-align: center;
+            }
+
+            .home-title {
+                font-size: 1.35rem;
+                white-space: nowrap;
+            }
+
+            .home-sub {
+                font-size: 0.8rem;
+                white-space: nowrap;
+            }
+
+            .icons-grid-container {
+                width: 100%;
+                padding: 8px 0 0 0;
+                margin-top: 0;
+                height: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                box-sizing: border-box;
             }
 
             .icons-grid {
                 display: grid;
                 grid-template-columns: repeat(4, 1fr);
-                column-gap: 8px; row-gap: 16px;
-                width: 100%; justify-items: center;
+                column-gap: 8px;
+                row-gap: 16px;
+                width: 100%;
+                max-width: none;
+                justify-items: center;
             }
-
-            .grid-icon-wrapper { grid-column: auto; }
-            .grid-icon-wrapper:nth-child(odd),
-            .grid-icon-wrapper:nth-child(even) { grid-column: auto; }
 
             .grid-icon-card { width: 56px; height: 56px; border-radius: 14px; }
             .grid-card-icon { font-size: 1rem; }
-
-            /* Labels no mobile com Shadows Into Light */
-            .grid-card-label {
-                font-size: 1rem;
-                letter-spacing: 0;
-            }
+            .grid-card-label { font-size: 0.95rem; letter-spacing: 0; }
 
             .avisos-panel {
-                position: relative; top: auto; right: auto;
-                width: calc(100% - 48px);
-                margin: 20px auto 0; height: 200px;
+                position: relative;
+                top: auto;
+                right: auto;
+                width: 100%;
+                height: 160px;
+                margin: 0;
+            }
+
+            .avisos-mars { width: 110px; }
+
+            /* Tool page mobile */
+            .tool-card {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 16px;
+                padding: 20px;
+            }
+
+            .tool-card-icon {
+                width: 60px; height: 60px;
+                border-radius: 14px;
+            }
+
+            .tool-card-icon .lucide { width: 28px; height: 28px; }
+
+            .tool-card-title { font-size: 1.05rem; }
+
+            /* Skeleton home mobile */
+            .skeleton-page.skeleton-page-home { padding: 32px 20px 40px 20px; }
+
+            .skeleton-home {
+                position: relative;
+                inset: auto;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: flex-start;
+                padding-left: 0;
+                gap: 24px;
+                height: auto;
+            }
+
+            .skeleton-home-grid {
+                width: 100%;
+                grid-template-columns: repeat(4, 1fr);
+                column-gap: 8px;
+                row-gap: 16px;
+            }
+
+            .skeleton-icon { height: 56px; border-radius: 14px; }
+
+            .skeleton-home-panel {
+                position: relative;
+                top: auto;
+                right: auto;
+                width: 100%;
+                height: 160px;
             }
         }
 
@@ -511,147 +1160,540 @@
 <div class="app-container" id="appContainer">
 
     <header class="navbar">
-        <div class="navbar-brand">
-            <div class="navbar-logo-badge">
-                <i class="fa-solid fa-brain navbar-brain-icon"></i>
-            </div>
-            <span class="navbar-title">Language Lab</span>
-            <span class="navbar-greeting-separator">|</span>
-            <span class="navbar-greeting">Olá, Aluno!</span>
+        <div class="navbar-left">
+            <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Abrir menu">
+                <i data-lucide="menu"></i>
+            </button>
+
+            <a class="navbar-brand" href="#inicio" aria-label="Ir para o início">
+                <div class="navbar-logo-badge">
+                    <img src="faviconbranco.png" alt="" class="navbar-logo-img">
+                </div>
+                <span class="navbar-title">Language Lab</span>
+                <span class="navbar-greeting-separator">|</span>
+                <span class="navbar-greeting">Hello, Student!</span>
+            </a>
         </div>
 
         <div class="navbar-actions">
             <button class="navbar-btn" id="sound-toggle-btn" title="Áudio/Som">
-                <i class="fa-solid fa-volume-high"></i>
+                <i class="fa-solid fa-volume-high" id="sound-icon"></i>
             </button>
         </div>
     </header>
-
-    <div class="mobile-menu-wrapper">
-        <button id="mobile-menu-toggle" class="mobile-menu-btn" aria-label="Abrir menu">
-            <i class="fa-solid fa-bars"></i>
-            <span>Menu</span>
-        </button>
-    </div>
 
     <div id="mobileOverlay" class="mobile-overlay"></div>
     <div id="sidebarOverlay" class="sidebar-overlay"></div>
 
     <aside id="sidebarDrawer" class="sidebar-drawer">
         <div class="nav-group" id="navGroup1">
-            <a href="https://dididoingles.github.io/Whiteboard/" class="nav-item" data-nav-index="0">
+            <a href="#inicio" class="nav-item" data-nav-index="0" data-rota="inicio">
+                <div class="nav-icon-box"><i data-lucide="home"></i></div>
+                <span class="nav-text">Início</span>
+            </a>
+            <a href="#quadro" class="nav-item" data-nav-index="1" data-rota="quadro">
                 <div class="nav-icon-box"><i data-lucide="brush"></i></div>
                 <span class="nav-text">Whiteboard</span>
             </a>
-            <a href="https://dididoingles.github.io/library/" class="nav-item" data-nav-index="1">
+            <a href="#biblioteca" class="nav-item" data-nav-index="2" data-rota="biblioteca">
                 <div class="nav-icon-box"><i data-lucide="library"></i></div>
                 <span class="nav-text">Biblioteca</span>
             </a>
-            <a href="listening.html" class="nav-item" data-nav-index="2">
+            <a href="#escuta" class="nav-item" data-nav-index="3" data-rota="escuta">
                 <div class="nav-icon-box"><i data-lucide="headphones"></i></div>
                 <span class="nav-text">Listening Lab</span>
             </a>
-            <a href="reading.html" class="nav-item" data-nav-index="3">
+            <a href="#leitura" class="nav-item" data-nav-index="4" data-rota="leitura">
                 <div class="nav-icon-box"><i data-lucide="book-open"></i></div>
                 <span class="nav-text">Reading Lab</span>
             </a>
-            <a href="writing.html" class="nav-item" data-nav-index="4">
+            <a href="#escrita" class="nav-item" data-nav-index="5" data-rota="escrita">
                 <div class="nav-icon-box"><i data-lucide="pen-tool"></i></div>
                 <span class="nav-text">Writing Lab</span>
             </a>
-            <a href="#" class="nav-item" data-nav-index="5" onclick="return false;">
+            <a href="#fala" class="nav-item" data-nav-index="6" data-rota="fala">
                 <div class="nav-icon-box"><i data-lucide="mic"></i></div>
                 <span class="nav-text">Speaking Lab</span>
             </a>
-            <a href="login.html" class="nav-item" data-nav-index="6">
+            <a href="#minhas-aulas" class="nav-item" data-nav-index="7" data-rota="minhas-aulas">
                 <div class="nav-icon-box"><i data-lucide="graduation-cap"></i></div>
                 <span class="nav-text">Minhas aulas</span>
             </a>
         </div>
     </aside>
 
-    <main class="icons-grid-container">
-        <div class="icons-grid">
+    <main class="view-container" id="view"></main>
 
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="labs.html">
-                    <i data-lucide="flask-conical" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Laboratórios</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="message-circle" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Praticar fala</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="headphones" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Ouça seu texto</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="heart-handshake" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Ajudante</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="star" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Favoritos</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="trophy" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Conquistas</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="calendar" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Agenda</span>
-            </div>
-
-            <div class="grid-icon-wrapper">
-                <div class="grid-icon-card" data-href="#">
-                    <i data-lucide="target" class="grid-card-icon"></i>
-                </div>
-                <span class="grid-card-label">Metas</span>
-            </div>
-
-        </div>
-    </main>
-
-    <div class="avisos-panel">
-        <div class="avisos-header">
-            <div class="avisos-header-title-box">
-                <div class="avisos-header-badge">
-                    <i class="fa-solid fa-brain"></i>
-                </div>
-                <span class="avisos-header-title">Avisos</span>
-            </div>
-            <div class="avisos-header-dots">
-                <span class="avisos-dot"></span>
-                <span class="avisos-dot"></span>
-            </div>
-        </div>
-
-        <div class="avisos-body">
-            <p class="avisos-text">Página externa incorporada...</p>
-        </div>
+    <div class="decorations" aria-hidden="true">
+        <img src="build.png" alt="" class="decor decor-build">
     </div>
 
 </div>
+
+
+<!-- ============================================================
+     PÁGINAS
+     ============================================================ -->
+
+<!-- ================= PÁGINA INICIAL ================= -->
+<template id="pagina-inicio">
+    <section class="home-page">
+        <div class="home-inner">
+
+            <div class="home-heading">
+                <h2 class="home-title">Welcome to our Lab</h2>
+                <p class="home-sub">Pratique, aprenda e melhore o seu Inglês</p>
+            </div>
+
+            <div class="icons-grid-container">
+                <div class="icons-grid">
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#laboratorios">
+                            <i data-lucide="flask-conical" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Laboratórios</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#praticar-fala">
+                            <i data-lucide="message-circle" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Praticar fala</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#ouvir-texto">
+                            <i data-lucide="headphones" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Ouça seu texto</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#ajudante">
+                            <i data-lucide="heart-handshake" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Ajudante</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#roleplay">
+                            <i data-lucide="drama" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Roleplay</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#stories">
+                            <i data-lucide="book-heart" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Stories</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#quiz">
+                            <i data-lucide="help-circle" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Quiz</span>
+                    </div>
+
+                    <div class="grid-icon-wrapper">
+                        <div class="grid-icon-card" data-href="#minhas-aulas">
+                            <i data-lucide="graduation-cap" class="grid-card-icon"></i>
+                        </div>
+                        <span class="grid-card-label">Minhas aulas</span>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="avisos-panel">
+                <div class="avisos-header">
+                    <div class="avisos-header-title-box">
+                        <div class="avisos-header-badge">
+                            <i class="fa-solid fa-brain"></i>
+                        </div>
+                        <span class="avisos-header-title">Avisos</span>
+                    </div>
+                    <div class="avisos-header-dots">
+                        <span class="avisos-dot"></span>
+                        <span class="avisos-dot"></span>
+                    </div>
+                </div>
+
+                <div class="avisos-body">
+                    <p class="avisos-text">Tudo certo! Não temos avisos importantes por enquanto.</p>
+                    <img src="mars.png" alt="" class="avisos-mars">
+                </div>
+            </div>
+
+        </div>
+    </section>
+</template>
+
+<!-- ================= PÁGINA LABORATÓRIOS (menu) ================= -->
+<template id="pagina-laboratorios">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <h2 class="page-title">Laboratórios</h2>
+        <p class="page-sub">Escolha um laboratório para praticar.</p>
+
+        <div class="cards-grid">
+            <a class="card-item" href="#fala">
+                <div class="card-item-icon"><i data-lucide="mic"></i></div>
+                <div class="card-item-body">
+                    <h3>Laboratório de Fala</h3>
+                    <p>Pratique speaking com ferramentas guiadas.</p>
+                </div>
+            </a>
+            <a class="card-item" href="#escuta">
+                <div class="card-item-icon"><i data-lucide="headphones"></i></div>
+                <div class="card-item-body">
+                    <h3>Laboratório de Escuta</h3>
+                    <p>Treine listening em situações reais.</p>
+                </div>
+            </a>
+            <a class="card-item" href="#pronuncia">
+                <div class="card-item-icon"><i data-lucide="volume-2"></i></div>
+                <div class="card-item-body">
+                    <h3>Laboratório de Pronúncia</h3>
+                    <p>Melhore sons específicos do inglês.</p>
+                </div>
+            </a>
+            <a class="card-item" href="#leitura">
+                <div class="card-item-icon"><i data-lucide="book-open"></i></div>
+                <div class="card-item-body">
+                    <h3>Laboratório de Leitura</h3>
+                    <p>Leia com apoio e glossário interativo.</p>
+                </div>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= PÁGINA FALA (menu) ================= -->
+<template id="pagina-fala">
+    <section class="page-content">
+        <a class="back-link" href="#laboratorios">
+            <i data-lucide="arrow-left"></i> Voltar para laboratórios
+        </a>
+        <h2 class="page-title">Laboratório de Fala</h2>
+        <p class="page-sub">Escolha uma ferramenta para praticar.</p>
+        <ul class="tools-list">
+            <li onclick="location.hash='#praticar-fala'">
+                <div class="tool-icon"><i data-lucide="message-circle"></i></div>Praticar fala
+            </li>
+            <li onclick="location.hash='#roleplay'">
+                <div class="tool-icon"><i data-lucide="drama"></i></div>Roleplay
+            </li>
+            <li onclick="location.hash='#stories'">
+                <div class="tool-icon"><i data-lucide="book-heart"></i></div>Stories
+            </li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA ESCUTA (menu) ================= -->
+<template id="pagina-escuta">
+    <section class="page-content">
+        <a class="back-link" href="#laboratorios">
+            <i data-lucide="arrow-left"></i> Voltar para laboratórios
+        </a>
+        <h2 class="page-title">Laboratório de Escuta</h2>
+        <p class="page-sub">Escolha uma ferramenta para praticar.</p>
+        <ul class="tools-list">
+            <li onclick="location.hash='#ouvir-texto'">
+                <div class="tool-icon"><i data-lucide="headphones"></i></div>Ouça seu texto
+            </li>
+            <li onclick="location.hash='#quiz'">
+                <div class="tool-icon"><i data-lucide="help-circle"></i></div>Quiz
+            </li>
+            <li onclick="location.hash='#stories'">
+                <div class="tool-icon"><i data-lucide="book-heart"></i></div>Stories
+            </li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA PRONÚNCIA (menu) ================= -->
+<template id="pagina-pronuncia">
+    <section class="page-content">
+        <a class="back-link" href="#laboratorios">
+            <i data-lucide="arrow-left"></i> Voltar para laboratórios
+        </a>
+        <h2 class="page-title">Laboratório de Pronúncia</h2>
+        <p class="page-sub">Escolha uma ferramenta para praticar.</p>
+        <ul class="tools-list">
+            <li onclick="location.hash='#ouvir-texto'">
+                <div class="tool-icon"><i data-lucide="headphones"></i></div>Ouça seu texto
+            </li>
+            <li onclick="location.hash='#praticar-fala'">
+                <div class="tool-icon"><i data-lucide="message-circle"></i></div>Praticar fala
+            </li>
+            <li onclick="location.hash='#stories'">
+                <div class="tool-icon"><i data-lucide="book-heart"></i></div>Stories
+            </li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA LEITURA (menu) ================= -->
+<template id="pagina-leitura">
+    <section class="page-content">
+        <a class="back-link" href="#laboratorios">
+            <i data-lucide="arrow-left"></i> Voltar para laboratórios
+        </a>
+        <h2 class="page-title">Laboratório de Leitura</h2>
+        <p class="page-sub">Escolha uma ferramenta para praticar.</p>
+        <ul class="tools-list">
+            <li onclick="location.hash='#stories'">
+                <div class="tool-icon"><i data-lucide="book-heart"></i></div>Stories
+            </li>
+            <li onclick="location.hash='#ajudante'">
+                <div class="tool-icon"><i data-lucide="heart-handshake"></i></div>Ajudante
+            </li>
+            <li onclick="location.hash='#quiz'">
+                <div class="tool-icon"><i data-lucide="help-circle"></i></div>Quiz
+            </li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA ESCRITA (menu) ================= -->
+<template id="pagina-escrita">
+    <section class="page-content">
+        <a class="back-link" href="#laboratorios">
+            <i data-lucide="arrow-left"></i> Voltar para laboratórios
+        </a>
+        <h2 class="page-title">Laboratório de Escrita</h2>
+        <p class="page-sub">Escolha uma ferramenta para praticar.</p>
+        <ul class="tools-list">
+            <li onclick="location.hash='#ajudante'">
+                <div class="tool-icon"><i data-lucide="heart-handshake"></i></div>Ajudante
+            </li>
+            <li onclick="location.hash='#roleplay'">
+                <div class="tool-icon"><i data-lucide="drama"></i></div>Roleplay
+            </li>
+            <li onclick="location.hash='#quiz'">
+                <div class="tool-icon"><i data-lucide="help-circle"></i></div>Quiz
+            </li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: PRATICAR FALA (externa) ================= -->
+<template id="pagina-praticar-fala">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Praticar fala</h2>
+            <p class="page-sub">Pratique frases e textos com uma IA assistente que corrige para você.</p>
+
+            <a class="tool-card" href="https://sites.google.com/view/languagelabbr/labs/speaking-lab/ia-da-di-conversa%C3%A7%C3%A3o" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="message-circle"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Praticar fala</h3>
+                    <p class="tool-card-desc">Pratique frases e textos com uma IA assistente que corrige para você.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: OUÇA SEU TEXTO (externa) ================= -->
+<template id="pagina-ouvir-texto">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Ouça seu texto</h2>
+            <p class="page-sub">Cole ou escreva uma frase ou texto e ouça a pronúncia correta.</p>
+
+            <a class="tool-card" href="https://dididoingles.github.io/leitor/" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="headphones"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Ouça seu texto</h3>
+                    <p class="tool-card-desc">Cole ou escreva uma frase ou texto e ouça a pronúncia correta com controle de velocidade.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: AJUDANTE (externa) ================= -->
+<template id="pagina-ajudante">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Ajudante</h2>
+            <p class="page-sub">Escreva em inglês com apoio para as palavras que você não sabe.</p>
+
+            <a class="tool-card" href="https://sites.google.com/view/languagelabbr/labs/writing-lab/ajudante" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="heart-handshake"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Ajudante</h3>
+                    <p class="tool-card-desc">Escreva em inglês adicionando as palavras que você não sabe em português, que o ajudante te mostra a palavra correta em contexto.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: ROLEPLAY (placeholder) ================= -->
+<template id="pagina-roleplay">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Roleplay</h2>
+            <p class="page-sub">Pratique situações reais de conversação em inglês.</p>
+
+            <a class="tool-card" href="#" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="drama"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Roleplay</h3>
+                    <p class="tool-card-desc">Em breve: pratique diálogos e situações do dia a dia em inglês.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: STORIES (placeholder) ================= -->
+<template id="pagina-stories">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Stories</h2>
+            <p class="page-sub">Aprenda inglês através de histórias curtas e envolventes.</p>
+
+            <a class="tool-card" href="#" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="book-heart"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Stories</h3>
+                    <p class="tool-card-desc">Em breve: leia e ouça histórias com vocabulário adaptado ao seu nível.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= FERRAMENTA: QUIZ (placeholder) ================= -->
+<template id="pagina-quiz">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+
+        <div class="tool-page">
+            <h2 class="page-title">Quiz</h2>
+            <p class="page-sub">Teste seu conhecimento com quizzes rápidos.</p>
+
+            <a class="tool-card" href="#" target="_blank" rel="noopener">
+                <div class="tool-card-icon">
+                    <i data-lucide="help-circle"></i>
+                </div>
+                <div class="tool-card-body">
+                    <h3 class="tool-card-title">Quiz</h3>
+                    <p class="tool-card-desc">Em breve: quizzes interativos para testar vocabulário, gramática e compreensão.</p>
+                </div>
+                <span class="tool-card-external">
+                    <i data-lucide="external-link"></i>
+                </span>
+            </a>
+        </div>
+    </section>
+</template>
+
+<!-- ================= PÁGINA BIBLIOTECA ================= -->
+<template id="pagina-biblioteca">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+        <h2 class="page-title">Biblioteca</h2>
+        <p class="page-sub">Materiais de apoio para seus estudos.</p>
+        <ul class="tools-list">
+            <li><div class="tool-icon"><i data-lucide="book-open"></i></div>Livros e textos</li>
+            <li><div class="tool-icon"><i data-lucide="video"></i></div>Vídeos recomendados</li>
+            <li><div class="tool-icon"><i data-lucide="music"></i></div>Músicas para praticar</li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA QUADRO ================= -->
+<template id="pagina-quadro">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+        <h2 class="page-title">Quadro Branco</h2>
+        <p class="page-sub">Espaço livre para anotações e desenhos.</p>
+        <ul class="tools-list">
+            <li><div class="tool-icon"><i data-lucide="brush"></i></div>Desenho livre</li>
+            <li><div class="tool-icon"><i data-lucide="sticky-note"></i></div>Post-its</li>
+            <li><div class="tool-icon"><i data-lucide="save"></i></div>Salvar quadro</li>
+        </ul>
+    </section>
+</template>
+
+<!-- ================= PÁGINA MINHAS AULAS ================= -->
+<template id="pagina-minhas-aulas">
+    <section class="page-content">
+        <a class="back-link" href="#inicio">
+            <i data-lucide="arrow-left"></i> Voltar para o início
+        </a>
+        <h2 class="page-title">Minhas Aulas</h2>
+        <p class="page-sub">Veja os assuntos das aulas aplicadas.</p>
+        <ul class="tools-list">
+            <li><div class="tool-icon"><i data-lucide="calendar"></i></div>Aula 1 — Present Simple</li>
+            <li><div class="tool-icon"><i data-lucide="calendar"></i></div>Aula 2 — Past Simple</li>
+            <li><div class="tool-icon"><i data-lucide="calendar"></i></div>Aula 3 — Present Perfect</li>
+        </ul>
+    </section>
+</template>
+
 
 <script>
     lucide.createIcons();
@@ -663,7 +1705,7 @@
         const audioCache = {};
 
         const audioUrls = {
-            hover: 'https://res.cloudinary.com/dbwqwgbtx/video/upload/v1780092968/arnav_geddada-ui-sound-2-374229_gh19tt.mp3',
+            hover: 'https://res.cloudinary.com/dbwqwgbtx/video/upload/v1780071228/soundshelfstudio-ui-tap-soft-short-514599_utntsl.mp3',
             click: 'https://res.cloudinary.com/dbwqwgbtx/video/upload/v1780071236/zapsplat_multimedia_beep_soft_click_button_87548_a99mcv.mp3'
         };
 
@@ -696,11 +1738,36 @@
 
         preloadAudio();
 
+        // ---------- TOGGLE DE SOM ----------
         const soundToggleBtn = document.getElementById('sound-toggle-btn');
-        if (soundToggleBtn) {
+        const soundIcon = document.getElementById('sound-icon');
+
+        if (soundToggleBtn && soundIcon) {
             soundToggleBtn.addEventListener('click', () => {
                 sfxEnabled = !sfxEnabled;
+
+                soundIcon.classList.toggle('fa-volume-high', sfxEnabled);
+                soundIcon.classList.toggle('fa-volume-xmark', !sfxEnabled);
+
                 soundToggleBtn.classList.toggle('muted', !sfxEnabled);
+
+                soundToggleBtn.classList.remove('toggling');
+                void soundToggleBtn.offsetWidth;
+                soundToggleBtn.classList.add('toggling');
+                setTimeout(() => soundToggleBtn.classList.remove('toggling'), 400);
+
+                playSFX('click', 0.3);
+            });
+        }
+
+        // ---------- SFX NO LOGO (navbar-brand) ----------
+        const navbarBrand = document.querySelector('.navbar-brand');
+        if (navbarBrand) {
+            navbarBrand.addEventListener('mouseenter', () => {
+                if (isMobile()) return;
+                playSFX('hover', 0.15);
+            });
+            navbarBrand.addEventListener('click', () => {
                 playSFX('click', 0.3);
             });
         }
@@ -724,6 +1791,7 @@
         }
 
         function updatePillPosition(index, triggerAnimation = true) {
+            if (isMobile()) return;
             if (index < 0 || index >= navItems.length) return;
             const targetItem = navItems[index];
             const iconBox = targetItem.querySelector('.nav-icon-box');
@@ -769,7 +1837,6 @@
             return window.matchMedia('(max-width: 768px)').matches;
         }
 
-        // ---------- HOVER NOS NAV ITEMS ----------
         navItems.forEach((item, idx) => {
             item.addEventListener('mouseenter', () => {
                 if (isMobile()) return;
@@ -779,7 +1846,6 @@
             });
         });
 
-        // ---------- OVERLAY DESKTOP ----------
         function showSidebarOverlay() {
             if (isMobile()) return;
             sidebarOverlay.classList.add('active');
@@ -814,7 +1880,10 @@
 
         let resizeTimeout;
         window.addEventListener('resize', () => {
-            if (isMobile()) return;
+            if (isMobile()) {
+                hidePill();
+                return;
+            }
             if (activeIndex !== -1 && pill.classList.contains('active')) {
                 clearTimeout(resizeTimeout);
                 resizeTimeout = setTimeout(() => {
@@ -823,7 +1892,6 @@
             }
         });
 
-        // ---------- SIDEBAR MOBILE ----------
         function openMobileSidebar() {
             sidebarDrawer.classList.add('mobile-open');
             mobileOverlay.classList.add('active');
@@ -838,25 +1906,208 @@
         mobileMenuBtn.addEventListener('click', openMobileSidebar);
         mobileOverlay.addEventListener('click', closeMobileSidebar);
 
-        // ---------- SFX ÍCONES CENTRAIS ----------
-        const mainIconCards = document.querySelectorAll('.grid-icon-card');
-        mainIconCards.forEach(card => {
-            card.addEventListener('mouseenter', () => {
-                if (isMobile()) return;
-                playSFX('hover', 0.2);
+        // ============================================================
+        // ROTEADOR DA CASCA + LAZY LOAD
+        // ============================================================
+        const rotas = [
+            'inicio', 'laboratorios',
+            'fala', 'escuta', 'pronuncia', 'leitura', 'escrita',
+            'biblioteca', 'quadro', 'minhas-aulas',
+            'praticar-fala', 'ouvir-texto', 'ajudante',
+            'roleplay', 'stories', 'quiz'
+        ];
+
+        const rotasComCards = ['laboratorios'];
+        const rotasHome = ['inicio'];
+        const rotasToolPage = ['praticar-fala', 'ouvir-texto', 'ajudante', 'roleplay', 'stories', 'quiz'];
+
+        const LOAD_DELAY = 600;
+        const SKELETON_MIN_TIME = 500;
+
+        let loadToken = 0;
+
+        function rotaAtual() {
+            const h = location.hash.replace('#', '');
+            return rotas.includes(h) ? h : 'inicio';
+        }
+
+        function marcarLinkAtivo(rota) {
+            document.querySelectorAll('.nav-item').forEach(a => {
+                a.classList.toggle('active', a.dataset.rota === rota);
             });
-            card.addEventListener('click', () => {
-                playSFX('click', 0.35);
-                const href = card.getAttribute('data-href');
-                if (href && href !== '#') window.location.href = href;
+        }
+
+        // ---------- GERADOR DE SKELETON ----------
+        function gerarSkeleton(rota) {
+            const usaHome = rotasHome.includes(rota);
+            const usaCards = rotasComCards.includes(rota);
+            const usaToolPage = rotasToolPage.includes(rota);
+            const wrapper = document.createElement('section');
+            wrapper.className = 'skeleton-page';
+
+            if (usaHome) {
+                wrapper.classList.add('skeleton-page-home');
+
+                const home = document.createElement('div');
+                home.className = 'skeleton-home';
+
+                const heading = document.createElement('div');
+                heading.style.width = 'var(--icon-grid-width)';
+                heading.style.display = 'flex';
+                heading.style.flexDirection = 'column';
+                heading.style.alignItems = 'center';
+                heading.style.gap = '8px';
+
+                const titleSkel = document.createElement('div');
+                titleSkel.className = 'skeleton-line';
+                titleSkel.style.width = '180px';
+                titleSkel.style.height = '24px';
+                heading.appendChild(titleSkel);
+
+                const subSkel = document.createElement('div');
+                subSkel.className = 'skeleton-line';
+                subSkel.style.width = '220px';
+                subSkel.style.height = '12px';
+                heading.appendChild(subSkel);
+
+                home.appendChild(heading);
+
+                const grid = document.createElement('div');
+                grid.className = 'skeleton-home-grid';
+                for (let i = 0; i < 8; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'skeleton-block skeleton-icon';
+                    grid.appendChild(c);
+                }
+                home.appendChild(grid);
+
+                const panel = document.createElement('div');
+                panel.className = 'skeleton-block skeleton-home-panel';
+                home.appendChild(panel);
+
+                wrapper.appendChild(home);
+                return wrapper;
+            }
+
+            const back = document.createElement('div');
+            back.className = 'skeleton-line skeleton-back';
+            wrapper.appendChild(back);
+
+            const title = document.createElement('div');
+            title.className = 'skeleton-line skeleton-title';
+            wrapper.appendChild(title);
+
+            const sub = document.createElement('div');
+            sub.className = 'skeleton-line skeleton-sub';
+            wrapper.appendChild(sub);
+
+            if (usaCards) {
+                const grid = document.createElement('div');
+                grid.className = 'skeleton-cards';
+                for (let i = 0; i < 4; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'skeleton-block skeleton-card';
+                    grid.appendChild(c);
+                }
+                wrapper.appendChild(grid);
+            } else if (usaToolPage) {
+                const box = document.createElement('div');
+                box.className = 'skeleton-tool-page';
+                const card = document.createElement('div');
+                card.className = 'skeleton-block skeleton-tool-card';
+                box.appendChild(card);
+                wrapper.appendChild(box);
+            } else {
+                const list = document.createElement('div');
+                list.className = 'skeleton-tools';
+                for (let i = 0; i < 3; i++) {
+                    const t = document.createElement('div');
+                    t.className = 'skeleton-block skeleton-tool';
+                    list.appendChild(t);
+                }
+                wrapper.appendChild(list);
+            }
+
+            return wrapper;
+        }
+
+        // ---------- APLICA STAGGER NOS ITENS REAIS ----------
+        function aplicarStagger(raiz) {
+            const alvos = raiz.querySelectorAll(
+                '.back-link, .page-title, .page-sub, .card-item, .tools-list li, .grid-icon-wrapper, .avisos-panel, .home-heading, .tool-card'
+            );
+
+            alvos.forEach((el, i) => {
+                el.classList.add('stagger-item');
+                el.style.animationDelay = (40 + i * 55) + 'ms';
             });
+        }
+
+        // ---------- BIND DE INTERAÇÕES NA HOME ----------
+        function bindHomeInteractions(pageRoot) {
+            pageRoot.querySelectorAll('.grid-icon-card').forEach(card => {
+                card.addEventListener('mouseenter', () => {
+                    if (isMobile()) return;
+                    playSFX('hover', 0.2);
+                });
+                card.addEventListener('click', () => {
+                    playSFX('click', 0.35);
+                    const href = card.getAttribute('data-href');
+                    if (href && href !== '#') {
+                        if (href.startsWith('#')) {
+                            location.hash = href;
+                        } else {
+                            window.location.href = href;
+                        }
+                    }
+                });
+            });
+        }
+
+        // ---------- RENDER PRINCIPAL ----------
+        function carregarPagina(rota) {
+            const tpl = document.getElementById('pagina-' + rota);
+            if (!tpl) return;
+
+            const view = document.getElementById('view');
+            const token = ++loadToken;
+
+            view.innerHTML = '';
+            view.appendChild(gerarSkeleton(rota));
+
+            marcarLinkAtivo(rota);
+            if (isMobile()) closeMobileSidebar();
+
+            setTimeout(() => {
+                if (token !== loadToken) return;
+
+                view.innerHTML = '';
+                const section = tpl.content.cloneNode(true);
+                view.appendChild(section);
+
+                if (window.lucide) lucide.createIcons();
+
+                const pageRoot = view.querySelector('.page-content, .home-page') || view;
+                aplicarStagger(pageRoot);
+
+                view.querySelectorAll('.card-item, .tools-list li, .back-link, .tool-card').forEach(el => {
+                    el.addEventListener('mouseenter', () => {
+                        if (isMobile()) return;
+                        playSFX('hover', 0.15);
+                    });
+                    el.addEventListener('click', () => playSFX('click', 0.3));
+                });
+
+                bindHomeInteractions(pageRoot);
+            }, Math.max(LOAD_DELAY, SKELETON_MIN_TIME));
+        }
+
+        window.addEventListener('hashchange', () => {
+            carregarPagina(rotaAtual());
         });
 
-        navItems.forEach(item => {
-            item.addEventListener('click', () => {
-                if (isMobile()) playSFX('click', 0.35);
-            });
-        });
+        carregarPagina(rotaAtual());
+
     })();
 </script>
 </body>
